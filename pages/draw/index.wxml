@@ -1,0 +1,12 @@
+<import src="tpl/btn.wxml" />
+<import src="tpl/tab.wxml" />
+<view class="container">
+  <view class="screen" >
+    <canvas class="canvas-element" canvas-id="canvas" style="width: {{w}}px; height: {{h}}px;" hidden="{{!showCanvas}}">
+      <cover-view>
+      </cover-view>
+    </canvas>
+  </view>
+  <template is="_tab_tpl" wx:if="{{showConfig}}" data="{{tabs}}" />
+  <template is="_btn_tpl" />
+</view>

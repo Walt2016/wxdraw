@@ -1,0 +1,59 @@
+<template name="_tab_tpl">
+
+  <view id="configPanel">
+    <div class="tab" layout="col">
+      <view class="tab-head" layout="row" layout-align="between center">
+        <view wx:for="{{tabs}}" wx:key="{{item.key}}" class="tab-head-item {{item.active ? 'active' : ''}}" id="{{item.key}}" bindtap='tabHandler'>
+          {{item.text}}
+        </view>
+      </view>
+
+
+      <scroll-view scroll-y style="height: 450px;" bindscrolltoupper="upper" bindscrolltolower="lower" bindscroll="scroll" class="tab-body scroll">
+        <view wx:for="{{tabs}}" wx:key="{{item.key}}" wx:if="{{item.active}}">
+          <div class="tab-body-item" id="panel_{{item.key}}">
+            <div class="grid mt4">
+              <div class="row head">
+                <div class="hd flex">{{item.key}}
+                  <div class="switchBtn {{item.switch}}" bindtap="{{item.switchMethod}}"></div>
+                </div>
+              </div>
+            </div>
+            <div class="switchBody {{item.switch}}">
+              <div class="grid mt4">
+
+                <view wx:for="{{item.items}}" wx:key="{{item.key}}">
+                  <view class="row">
+                    <view class='hd'>{{item.text}}</view>
+                    <view bindtap='{{item.method}}' class='td flex'>
+                      <view wx:if="{{item.key=='color'}}">{{item.value}}
+                        <div class="colorblock" style="background-color:{{item.value}}"></div>
+                      </view>
+                      <view wx:else>{{item.value}}</view>
+                    </view>
+                  </view>
+                </view>
+
+              </div>
+              <div class="grid mt4">
+                <div class="row head">
+                  <div class="hd flex">随机
+                  </div>
+                </div>
+
+                <view wx:for="{{item.random}}" wx:key="{{item.key}}">
+                  <view class="row">
+                    <view class='hd'>{{item.text}}</view>
+                    <view bindtap='{{item.method}}' class='td flex'>
+                      {{item.value}}
+                    </view>
+                  </view>
+                </view>
+              </div>
+            </div>
+          </div>
+        </view>
+      </scroll-view>
+    </div>
+  </view>
+</template>

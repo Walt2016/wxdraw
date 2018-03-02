@@ -1,0 +1,9 @@
+<template name="_btn_tpl">
+  <div class="btn-group row">
+    <div class="btn row center w100" bindtap="configHandler" id="configBtn">设置
+      <div class="icon upArrow ml4"></div>
+    </div>
+    <div class="btn hide w100" bindtap="stopHandler" id="stopBtn">停止</div>
+    <div class="btn" bindtap="startHandler" id="startBtn">画图</div>
+  </div>
+</template>
