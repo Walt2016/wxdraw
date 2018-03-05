@@ -4849,7 +4849,7 @@
 
 
                 var sr = r;
-                var width, height;
+                var width=r, height=r;
 
                 if (opt.group.switch == "on") {
                     if (["mirror", "surround"].indexOf(opt.group.group) != -1) {
@@ -4859,6 +4859,11 @@
                     }
                     // sr=_.min(sr,canvas.width/2-10)
                 }
+
+                // if(width>=this.canvas.width||height>=this.canvas.height){
+                //     opt.motion.bounce=false;
+                // }
+                
 
                 if (opt.motion.switch == "on") {
                     opt.group.animate = false;
@@ -4886,6 +4891,8 @@
                     },
                     colorArr: colorArr
                 })
+
+
 
                 this.opt = _.extend({}, opt);
                 this.setup();
@@ -4922,6 +4929,7 @@
             },
             //反弹
             bounce: function() {
+                
                 var g = this.opt.group
                 if (g.x < g.range.left + g.width) { //碰到左边的边界
                     g.x = g.width;
@@ -5324,12 +5332,14 @@
                 data: {},
                 methods: {
                     autoNext: function(item, ev) {
+                        // var k = this[0],
+                        // x = this[1];
                         if (inBrowser) {
                             var k = item.closest(".tab-body-item").attr("name");
-                            var name = item.name;
+                            var x = item.name;
                             var checked = item.checked;
-                            optCycle.data[k][name].auto = checked;
-                            console.log(name, checked)
+                            optCycle.data[k][x].auto = checked;
+                            console.log(x, checked)
 
                         }
                     }

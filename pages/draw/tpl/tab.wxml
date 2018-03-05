@@ -29,7 +29,7 @@
                   <view class="td flex">值</view>
                   <view>自动</view>
                 </view>
-                <checkbox-group bindchange="checkHandler" >
+                <checkbox-group bindchange="checkHandler" data-key="{{item.key}}">
 
                   <view wx:for="{{item.items}}" wx:key="{{item.key}}">
                     <view class="row">

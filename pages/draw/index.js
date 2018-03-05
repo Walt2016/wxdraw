@@ -8,12 +8,13 @@ Page({
   data: c.viewData(),
   checkHandler:function(e){
     console.log(e)
-    for (var key in c.data.shape){
-      if (_.isObject(c.data.shape[key])){
-        if (e.detail.value.indexOf(key) >= 0) {
-          c.data.shape[key].auto = true;
+    var k=e.target.dataset.key
+    for (var x in c.data[k]){
+      if (_.isObject(c.data[k][x])){
+        if (e.detail.value.indexOf(x) >= 0) {
+          c.data[k][x].auto = true;
         } else {
-          c.data.shape[key].auto = false;
+          c.data[k][x].auto = false;
         }
       }
       
