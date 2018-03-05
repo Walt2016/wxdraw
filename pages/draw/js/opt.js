@@ -13,11 +13,10 @@
     }
 }(this,
     function() {
-     
         var opt = {
             "shape": {
                 "text": "图形",
-                "active":true,
+                "active": true,
                 "shape": {
                     "value": [{
                             "key": "line",
@@ -114,13 +113,15 @@
                     "value": [0, 60, 120, 180],
                     "type": "cycle",
                     "index": 0,
-                    "text": "角度"
+                    "text": "角度",
+                    "auto":true
                 },
                 "num": {
                     "value": [3, 4, 5, 6, 7, 8, 9, 10, 20, 30, 100],
                     "type": "cycle",
                     "index": 0,
-                    "text": "边数"
+                    "text": "边数",
+                    "auto":true
                 },
                 "r": {
                     "value": [5, 10, 30, 40, 60, 80, 120, 200, 300],
@@ -187,7 +188,12 @@
                     "value": [0.5, 1, 2, 3, 4, 5, 10, 20],
                     "type": "cycle",
                     "index": 1,
-                    "text": "线粗"
+                    "text": "线条宽度"
+                },
+                "lineColor":{
+                    "value": "rgb",
+                    "type": "color",
+                    "text": "线条颜色"
                 },
 
                 "fill": {
@@ -198,15 +204,7 @@
                     "value": "rgba",
                     "type": "color",
                     "text": "颜色"
-                },
-
-                "random": {
-                    "shape": false,
-                    "num": false,
-                    "r": false,
-                    "color": false,
-                    "a": false
-                },
+                }
             },
             "group": {
                 "text": "组合",
@@ -220,10 +218,10 @@
                             "key": "concentric",
                             "text": "同心"
                         },
-                        {
-                            "key": "inpolygon",
-                            "text": "内切多边形"
-                        },
+                        // {
+                        //     "key": "inpolygon",
+                        //     "text": "内切多边形"
+                        // },
                         {
                             "key": "excircle",
                             "text": "外切圆"
@@ -242,9 +240,9 @@
                     "text": "组合"
                 },
                 "sr": {
-                    "value": [30, 60, 120, 200, 300],
+                    "value": [0,30, 60, 120, 200, 300],
                     "type": "cycle",
-                    "index": 2,
+                    "index": 3,
                     "text": "环绕半径"
                 },
                 "clockwise": {
@@ -284,9 +282,6 @@
                 "colorful": {
                     "value": true,
                     "text": "多彩"
-                },
-                "random": {
-                    "interval": false
                 }
 
             },
@@ -308,9 +303,9 @@
                     "text": "运动形式"
                 },
                 "speed": {
-                    "value": [1, 2, 3, 5, 10, 30, 60, 120],
+                    "value": [0.1,0.5,1, 2, 3, 5, 10, 30, 60, 120],
                     "type": "cycle",
-                    "index": 0,
+                    "index": 2,
                     "text": "速度"
                 },
                 "num": //movenum
@@ -331,10 +326,6 @@
                 "colorful": {
                     "value": true,
                     "text": "多彩"
-                },
-                "random": {
-                    "num": false,
-                    "speed": false
                 }
             }
         }

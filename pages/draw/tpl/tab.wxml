@@ -9,10 +9,12 @@
       </view>
 
 
-      <scroll-view scroll-y style="height: 450px;" bindscrolltoupper="upper" bindscrolltolower="lower" bindscroll="scroll" class="tab-body scroll">
+      <scroll-view scroll-y style="height: 420px;" bindscrolltoupper="upper" bindscrolltolower="lower" bindscroll="scroll" class="tab-body scroll">
         <view wx:for="{{tabs}}" wx:key="{{item.key}}" wx:if="{{item.active}}">
           <div class="tab-body-item" id="panel_{{item.key}}">
             <div class="grid mt4">
+
+
               <div class="row head">
                 <div class="hd flex">{{item.key}}
                   <div class="switchBtn {{item.switch}}" bindtap="{{item.switchMethod}}"></div>
@@ -22,33 +24,28 @@
             <div class="switchBody {{item.switch}}">
               <div class="grid mt4">
 
-                <view wx:for="{{item.items}}" wx:key="{{item.key}}">
-                  <view class="row">
-                    <view class='hd'>{{item.text}}</view>
-                    <view bindtap='{{item.method}}' class='td flex'>
-                      <view wx:if="{{item.key=='color'}}">{{item.value}}
-                        <div class="colorblock" style="background-color:{{item.value}}"></div>
+                <view class="row">
+                  <view class="hd">字段</view>
+                  <view class="td flex">值</view>
+                  <view>自动</view>
+                </view>
+                <checkbox-group bindchange="checkHandler" >
+
+                  <view wx:for="{{item.items}}" wx:key="{{item.key}}">
+                    <view class="row">
+                      <view class='hd'>{{item.text}}</view>
+                      <view bindtap='{{item.method}}' class='td flex'>
+                        <view wx:if="{{item.key=='color'||item.key=='lineColor'}}">{{item.value}}
+                          <div class="colorblock" style="background-color:{{item.value}}"></div>
+                        </view>
+                        <view wx:else>{{item.value}}</view>
                       </view>
-                      <view wx:else>{{item.value}}</view>
+                      <view>
+                        <checkbox data-index="{{index}}" value="{{item.key}}" checked="{{item.auto}}" />
+                      </view>
                     </view>
                   </view>
-                </view>
-
-              </div>
-              <div class="grid mt4">
-                <div class="row head">
-                  <div class="hd flex">随机
-                  </div>
-                </div>
-
-                <view wx:for="{{item.random}}" wx:key="{{item.key}}">
-                  <view class="row">
-                    <view class='hd'>{{item.text}}</view>
-                    <view bindtap='{{item.method}}' class='td flex'>
-                      {{item.value}}
-                    </view>
-                  </view>
-                </view>
+                </checkbox-group>
               </div>
             </div>
           </div>

@@ -3257,6 +3257,10 @@
                     if (!isSupportTouch && type == TAP) {
                         type = "click";
                     }
+
+                    // if(type==TAP&&el.nodeName=="input"){
+                    //     type = "click";
+                    // }
                     // var canDrag = true;
 
 
@@ -3433,6 +3437,9 @@
                         listener = opt.listener || opt.callback,
                         once = opt.once || false; //事件只运行一次，运行一次就自行remove
                     if (_.isElement(el)) {
+                        if (el.nodeName.toLowerCase() == "input" && type == TAP) {
+                            type = "click"
+                        }
                         if (clear) {
                             self.clear({
                                 el: el,
@@ -3447,18 +3454,20 @@
                         })
                     } else if (_.isArray(el)) {
                         el.forEach(function(t) {
-                            if (clear) {
-                                self.clear({
-                                    el: t,
-                                    type: type
-                                });
-                            }
-                            es.push({
-                                type: type,
-                                el: t,
-                                listener: listener,
-                                once: once
-                            })
+                            // opt.el=t;
+                            _option(_.extend({}, opt, { el: t }));
+                            // if (clear) {
+                            //     self.clear({
+                            //         el: t,
+                            //         type: type
+                            //     });
+                            // }
+                            // es.push({
+                            //     type: type,
+                            //     el: t,
+                            //     listener: listener,
+                            //     once: once
+                            // })
 
                         });
                     }
@@ -4168,11 +4177,6 @@
                     this.draw = draw;
                     this.canvas = draw.canvas;
                     this.context = draw.context;
-                    // this.render = draw.render.bind(draw);
-                    // this.closePath = draw.closePath.bind(draw);
-                    // this.beginPath = draw.beginPath.bind(draw);
-                    // this.link = draw.link.bind(draw);
-                    // this.linkGroup = draw.linkGroup.bind(draw);
                 }
                 if (!opt) return;
                 var x = _.isUndefined(opt.x) ? this.canvas.width / 2 : opt.x;
@@ -4185,7 +4189,7 @@
 
 
 
-                var opt = self.opt = _.extend({}, opt, {
+                var opt = this.opt = _.extend({}, opt, {
                     width: opt.r,
                     height: opt.r,
                     //range
@@ -4487,7 +4491,7 @@
                 })
                 return vs2;
             },
-           
+
             circle: function(opt) {
                 var ctx = this.context;
                 var x = opt.x,
@@ -4630,7 +4634,6 @@
             square: function(opt) {
                 opt.num = 4;
                 return this.polygon(opt);
-
             },
             //矩形
             rectangle: function(opt) {
@@ -4680,7 +4683,6 @@
                 // this.link(vs, opt)
                 return this;
             },
-            
             //对角线
             diagonal: function(opt) {
                 var vs = this.vertices(opt);
@@ -4807,13 +4809,7 @@
                 })(vs);
                 return self.draw.linkGroup(vsGroup, opt);
             },
-            // //外切圆
-            // excircle: function(opt) {
-            //     var shape = opt.shape || "polygon";
-            //     this[shape](opt);
-            //     this.circle(opt);
-            //     return this;
-            // },
+            
             //顶点镜像
             mirror: function(opt) {
                 var vsGroup = [];
@@ -4828,7 +4824,6 @@
                 });
                 return this.draw.linkGroup(vsGroup, opt);
             },
-
         }
         _shape.prototype.init.prototype = _shape.prototype;
 
@@ -4846,28 +4841,18 @@
                 var x = opt.shape.x,
                     y = opt.shape.y,
                     r = opt.shape.r,
-                    color = opt.shape.color;
-                var shape = opt.shape.shape || "circle";
-
+                    color = opt.shape.color,
+                    shape = opt.shape.shape || "circle";
                 var colorful = opt.group.colorful;
-
-
                 var speed = opt.motion.speed || 3;
                 // var identifier = opt.motion.identifier;
 
-                // var bounce = opt.motion.bounce
-                // // var colorful = opt.motion.colorful;
-                // opt.group.animate = false;
-                // opt.group.colorful = false;
-
-                var a = opt.shape.a;
-                // var mode = opt.motion.mode;
 
                 var sr = r;
                 var width, height;
 
                 if (opt.group.switch == "on") {
-                    if (["mirror", "surround"].indexOf(opt.group) != -1) {
+                    if (["mirror", "surround"].indexOf(opt.group.group) != -1) {
                         // sr += opt.sr
                         width = opt.group.sr + r;
                         height = opt.group.sr + r
@@ -4875,48 +4860,39 @@
                     // sr=_.min(sr,canvas.width/2-10)
                 }
 
-
-
-                this.id = opt.id;
-                this.x = x;
-                this.y = y;
-                this.r = r || 5;
-                // if (colorful) {
-                //     this.color = _.rgba(); // _.rgba();
-                // } else {
-                //     this.color = color;
-                // }
-                // speed: 15,
-                this.vx = (Math.random() * 2 - 1) * speed;
-                this.vy = (Math.random() * 2 - 1) * speed;
-
-                // this.sr = sr;
-                this.a = a;
-                this.width = width;
-                this.height = height;
-                this.range = {
-                    top: 0,
-                    left: 0,
-                    right: this.canvas.width,
-                    bottom: this.canvas.height
+                if (opt.motion.switch == "on") {
+                    opt.group.animate = false;
+                    if(_.isUndefined(opt.group.a))opt.group.a=0;
                 }
-
-                // opt.shape = _.extend(opt.shape, { x: this.x, y: this.y, color: this.color, a: this.a })
-
-                if (opt.group.switch == "on") {
-                    this[opt.group.group](opt)
-                } else {
-                    this.shape(opt.shape);
+                var colorArr = [];
+                var interval = opt.group.interval || 1;
+                if (colorful) {
+                    for (var i = 0; i < 360 / interval; i++) {
+                        colorArr.push(_.rgba())
+                    }
                 }
+                opt.group = _.extend({}, opt.group, {
+                    speed: speed,
+                    // vx: (Math.random() * 2 - 1) * speed,
+                    // vy: (Math.random() * 2 - 1) * speed,
+                    // a: 0,
+                    width: width,
+                    height: height,
+                    range: {
+                        top: 0,
+                        left: 0,
+                        right: this.canvas.width,
+                        bottom: this.canvas.height
+                    },
+                    colorArr: colorArr
+                })
 
-                // _shapeGroup(this, opt)
-                // self.group.call(self, opt);
-
-                // self[shape].call(self, _.extend(opt, { x: this.x, y: this.y, color: this.color }))
+                this.opt = _.extend({}, opt);
+                this.setup();
             },
             //图形
             shape: function(opt) {
-                _.shape(this.draw, opt);
+                this.draw.shape(opt.shape)
             },
             color: function(opt) {
                 var colorful = opt.group.colorful;
@@ -4931,43 +4907,54 @@
                 }
                 return opt2;
             },
+            setup: function(opt) {
+                var opt = opt || this.opt;
+                if (opt.group.switch == "on") {
+                    this[opt.group.group](opt)
+                } else {
+                    this.shape(opt);
+                }
+            },
             //旋转
             rotate: function() {
-                this.a += speed;
+                this.opt.group.a += this.opt.group.speed;
                 return this;
             },
             //反弹
             bounce: function() {
-                if (this.x < this.range.left + this.width) { //碰到左边的边界
-                    this.x = this.width;
-                    this.vx = -this.vx;
-                } else if (this.y < this.range.top + this.height) {
-                    this.y = this.height;
-                    this.vy = -this.vy;
-                } else if (this.x > this.range.right - this.width) {
-                    this.x = this.range.right - this.widt;
-                    this.vx = -this.vx;
-                } else if (this.y > this.range.bottom - this.height) {
-                    this.y = this.range.bottom - this.height;
-                    this.vy = -this.vy;
+                var g = this.opt.group
+                if (g.x < g.range.left + g.width) { //碰到左边的边界
+                    g.x = g.width;
+                    g.vx = -g.vx;
+                } else if (g.y < g.range.top + g.height) {
+                    g.y = g.height;
+                    g.vy = -g.vy;
+                } else if (g.x > g.range.right - g.width) {
+                    g.x = g.range.right - g.width;
+                    g.vx = -g.vx;
+                } else if (g.y > g.range.bottom - g.height) {
+                    g.y = g.range.bottom - g.height;
+                    g.vy = -g.vy;
                 }
             },
             //移动
             move: function() {
-                this.x += this.vx;
-                this.y += this.vy;
-                // if (bounce) {
-                //     this.bounce()
-                // }
+                var g = this.opt.group;
+                g.x += g.vx;
+                g.y += g.vy;
+                if (this.opt.motion.bounce) {
+                    this.bounce()
+                }
                 return this;
             },
 
             //环形
             ring: function(opt) {
-                this.shape(opt.shape);
+                this.shape(opt);
                 var r2 = opt.shape.r * opt.shape.rRatio;
                 opt.shape = _.extend({}, opt.shape, { r: r2 });
-                this.shape(opt.shape);
+                this.shape(opt);
+                // this.draw.shape(opt.shape);
                 // this[shape] && this[shape](opt)
 
 
@@ -4996,12 +4983,12 @@
             // 公转: revolution 自转: rotation
             surround: function(opt) {
                 var self = this;
-                var x = opt.shape.x,
-                    y = opt.shape.y,
-                    r = opt.shape.r;
+                var r = opt.shape.r;
                 var rotation = opt.group.rotation; //自转
                 var interval = opt.group.interval || 1; //间隔
                 var spiral = opt.group.spiral; //螺旋
+                var x = opt.group.x,
+                    y = opt.group.y;
 
                 var sr = opt.group.sr; //环绕半径
                 if (_.isUndefined(sr)) {
@@ -5011,22 +4998,24 @@
                 var clockwise = opt.group.clockwise; //顺时针逆时针
                 var sAngle, eAngle;
 
+                var sa=opt.group.a||0;
+
                 if (clockwise) {
-                    sAngle = 360;
-                    eAngle = 0;
+                    sAngle = sa+360;
+                    eAngle = sa; //0;
                     if (spiral) {
                         sAngle = sAngle * spiral;
                     }
                 } else {
-                    sAngle = 0;
-                    eAngle = 360
+                    sAngle = sa ;//0;
+                    eAngle = sa+360
                     if (spiral) {
                         eAngle = eAngle * spiral;
                     }
                 }
                 var a = sAngle;
                 var animationInterval = opt.group.animationInterval || 5;
-                // var _surround = 
+                var index = 0;
                 (function _surround() {
                     if (r < 5) {
                         return
@@ -5057,8 +5046,10 @@
                         x: x + sr * _.sin(a),
                         y: y + sr * _.cos(a),
                         r: r,
+                        color: opt.group.colorArr[index++]
                     }
-                    self.shape(_.extend({}, opt.shape, opt2, self.color(opt)))
+                    opt.shape = _.extend({}, opt.shape, opt2) //, self.color(opt)
+                    self.shape(opt);
                     if (opt.group.animate) { //动画
                         setTimeout(_surround, animationInterval)
                     } else {
@@ -5078,7 +5069,8 @@
                     if (r <= 0) {
                         return;
                     }
-                    self.shape(_.extend({}, opt.shape, self.color(opt), { r: r }))
+                    opt.shape=_.extend({}, opt.shape, self.color(opt), { r: r });
+                    self.shape(opt);
                     r = r - interval;
                     if (opt.group.animate) {
                         setTimeout(_concentric, animationInterval)
@@ -5087,6 +5079,17 @@
                     }
                 })();
                 return self;
+            },
+            //外切圆
+            excircle: function(opt) {
+                this.shape(opt);
+                // var shape = opt.shape || "polygon";
+                // this[shape](opt);
+                opt.shape=_.extend({},opt.shape,{shape:"circle",text:""})
+                this.shape(opt);
+
+                // this.circle(opt);
+                return this;
             },
             //平铺
             repeat: function(opt) {
@@ -5131,7 +5134,8 @@
                             opt.shape.x -= 2 * r;
                         }
                     }
-                    self.shape.call(self, _.extend({}, opt.shape, self.color(opt)));
+                    opt.shape=_.extend({}, opt.shape, self.color(opt));
+                    self.shape.call(self, opt);
                     opt.shape.y += 2 * r;
                     if (animate) {
                         setTimeout(_repeat, animationInterval);
@@ -5192,65 +5196,40 @@
             init: function(draw, opt) {
                 var self = this;
                 this.draw = draw;
-                var num = opt.motion.num;
                 this.mode = opt.motion.mode;
                 this.link = opt.motion.link;
-                // this.linkGroup = draw.linkGroup;
-
                 this.speed = opt.motion.speed || 1;
+                var num = opt.motion.num;
                 var colorful = opt.motion.colorful;
-                // this.speedXY = {
-                //     vx: (Math.random() * 2 - 1) * opt.motion.speed || 1,
-                //     vy: (Math.random() * 2 - 1) * opt.motion.speed || 1,
-                //     bounce: opt.motion.bounce
-                // }
-
-
-
 
                 if (opt.motion.switch == "on") {
                     opt.shape.animate = false
                 }
                 this.groups = [];
                 for (var i = 0; i < num; i++) {
-                    opt.shape = _.extend({}, opt.shape, {
-                        vx: (Math.random() * 2 - 1) * opt.motion.speed || 1,
-                        vy: (Math.random() * 2 - 1) * opt.motion.speed || 1,
-                        bounce: opt.motion.bounce
+                    opt.id = i;
+                    var t;
+                    if (opt.group.switch == "on") {
+                        this.mode = _.camelCase(opt.motion.mode, "group");
 
-                    });
-                    var t = draw.shape(opt.shape);
-                    t.color(colorful)
+                        opt.group = _.extend({}, opt.group, {
+                            vx: (Math.random() * 2 - 1) * opt.motion.speed || 1,
+                            vy: (Math.random() * 2 - 1) * opt.motion.speed || 1,
+                            bounce: opt.motion.bounce
+                        });
+                        t = draw.group(opt);
+                    } else {
+                        opt.shape = _.extend({}, opt.shape, {
+                            vx: (Math.random() * 2 - 1) * opt.motion.speed || 1,
+                            vy: (Math.random() * 2 - 1) * opt.motion.speed || 1,
+                            bounce: opt.motion.bounce
+                        });
+                        t = draw.shape(opt.shape);
+                        t.color(colorful)
+                    }
                     this.groups.push(t);
                 };
 
-                // this.rotate(draw, opt);
-
-
-
-                // (function _movie() {
-                //     for (var i = 0; i < num; i++) {
-                //         // this.groups.push(new GROUP(i));
-                //         opt.id = i;
-                //         // this.groups.push(_shapeGroup(draw, opt))
-                //         // this.groups.push(_shape(draw,opt.shape))
-                //         // groupsTimer&&clearTimeout(groupsTimer)
-
-
-                //         opt.shape.a += speed;
-                //         // _shape(draw, opt.shape)
-                //         draw.clear()
-                //         draw.shape(opt.shape)
-
-
-
-
-
-
-                //     }
-                //     // this.id = setTimeout(_movie, 500)
-                //     self.id = requestAnimationFrame(_movie);
-                // })();
                 this.movie();
             },
             //旋转
@@ -5273,22 +5252,31 @@
 
                 groups.forEach(function(t, i) {
                     switch (mode) {
-                        case "rotation": //旋转
-                            // self.draw.clear();
-                            // t.color(self.colorful);
+                        case "rotation":
+                        case "rotationGroup": //旋转
                             t.rotate(self.speed).setup();
-
+                            break;
+                        case "move":
+                        case "moveGroup": //移动
+                            t.move().setup();
                             break;
                         default: //移动
-                            // self.draw.clear();
                             t.move().setup();
-                            break
+                            break;
                     }
+                    if (self.link) { //连接线
 
-                    if (self.link) {
+
                         for (var j = i; j < len - 1; j++) {
-                            var vs = [t.opt, groups[j + 1].opt];
-                            vsGroup.push(vs);
+                            var vs;
+                            if (mode == "moveGroup") {
+                                vs = [t.opt.group, groups[j + 1].opt.group];
+                            } else {
+                                vs = [t.opt, groups[j + 1].opt];
+                            }
+
+                            self.draw.link(vs);
+                            // vsGroup.push(vs);
 
                             // if (t.meet(groups[j + 1])) {
                             //     console.log("反弹")
@@ -5307,11 +5295,8 @@
                             // }
                         }
                     }
-                })
-
-                if (self.link) {
-                    self.draw.linkGroup(vsGroup);
-                }
+                });
+                // self.link&&self.draw.linkGroup(vsGroup);
                 self.draw.canvas.callback && self.draw.canvas.callback.call(self.draw.context, self.draw.context);
 
                 if (inBrowser) {
@@ -5337,7 +5322,18 @@
         var createOptCycle = _.createOptCycle = function(optJson) {
             var optCycle = {
                 data: {},
-                methods: {},
+                methods: {
+                    autoNext: function(item, ev) {
+                        if (inBrowser) {
+                            var k = item.closest(".tab-body-item").attr("name");
+                            var name = item.name;
+                            var checked = item.checked;
+                            optCycle.data[k][name].auto = checked;
+                            console.log(name, checked)
+
+                        }
+                    }
+                },
                 filters: {
                     toggle: function(val) {
                         return val == true ? "是" : "否"
@@ -5373,20 +5369,23 @@
                     val = this == "on" ? "off" : "on";
                 }
                 return val;
-            }
+            };
             var _toggle = function(k, x) {
                 optCycle.methods[_.camelCase("next", k, x)] = (function(item, ev) {
                     var k = this[0],
                         x = this[1];
                     var value;
-                    if (x.indexOf("random") == 0) {
-                        var y = x.substr(6).toLowerCase();
-                        x = "random";
-                        value = optCycle.data[k][x][y] = !optCycle.data[k][x][y];
-                    } else {
-                        if (optCycle.data[k][x]) {
-                            value = optCycle.data[k][x].value = !optCycle.data[k][x].value;
-                        }
+                    // if (x.indexOf("random") == 0) {
+                    //     var y = x.substr(6).toLowerCase();
+                    //     x = "random";
+                    //     value = optCycle.data[k][x][y] = !optCycle.data[k][x][y];
+                    // } else {
+                    //     if (optCycle.data[k][x]) {
+                    //         value = optCycle.data[k][x].value = !optCycle.data[k][x].value;
+                    //     }
+                    // }
+                    if (optCycle.data[k][x]) {
+                        value = optCycle.data[k][x].value = !optCycle.data[k][x].value;
                     }
 
                     if (inBrowser) {
@@ -5404,7 +5403,7 @@
                     }
                     return optCycle
                 }).bind([k, x])
-            }
+            };
             var _next = function(k, x) {
                 optCycle.methods[_.camelCase("next", k, x)] = (function(item, ev) {
                     var k = this[0],
@@ -5435,7 +5434,7 @@
                                 div2.css({ width: w / 2, height: h, top: 0, left: 0, position: "absolute", background: background });
                             }
                             var val = c.val();
-                            if (x == "color") {
+                            if (["color", "lineColor"].indexOf(x) >= 0) {
                                 val = optCycle.filters.color(val);
                             }
                             item && item.html(_.isObject(val) ? val.text : val);
@@ -5447,20 +5446,15 @@
                                 div2.remove();
                             }, 200)
 
-                            console.log(val);
+                            // console.log(val);
 
                         } else {
                             c.next();
                             console.log(c.val());
-
                         }
-
-
-
                     }
-
                 }).bind([k, x]);
-            }
+            };
 
             for (var k in optJson) {
                 var o = optJson[k];
@@ -5468,12 +5462,13 @@
                     optCycle.data[k] = {};
                     for (var x in o) {
                         var val = o[x];
-                        if (x == "random") {
-                            optCycle.data[k][x] = val;
-                            for (var y in val) {
-                                _toggle(k, _.camelCase(x, y), val[y]);
-                            }
-                        } else if (x == "switch") {
+                        // if (x == "random") {
+                        //     optCycle.data[k][x] = val;
+                        //     for (var y in val) {
+                        //         _toggle(k, _.camelCase(x, y), val[y]);
+                        //     }
+                        // } else 
+                        if (x == "switch") {
                             optCycle.data[k][x] = val;
                             _next(k, x);
 
@@ -5511,6 +5506,7 @@
                                         }
                                         if (c) {
                                             if (val.text) c.text(val.text);
+                                            if (val.auto) c.auto = val.auto;
                                             optCycle.data[k][x] = c;
                                             _next(k, x);
 
@@ -5541,23 +5537,33 @@
                         opt[k] = {};
                         for (var x in o) {
                             var val = o[x];
-                            if (x == "random") {
-                                for (var y in val) {
-                                    opt[k][_.camelCase(x, y)] = val[y];
-                                }
-                            } else {
-                                if (_.isBoolean(val)) {
-                                    opt[k][x] = val;
-                                } else if (_.isObject(val)) {
-                                    if (_.isBoolean(val.value)) {
-                                        opt[k][x] = val.value;
-                                    } else {
-                                        opt[k][x] = _.isObject(val.val()) ? val.val().key : val.val();
+                            // if (x == "random") {
+                            //     for (var y in val) {
+                            //         if (val[y]) {
+                            //             optCycle.data[k][y].next(); //random()
+                            //         }
+                            //     }
+                            // } else {
+
+                            if (_.isBoolean(val)) {
+                                opt[k][x] = val;
+                            } else if (_.isObject(val)) {
+                                if (_.isBoolean(val.value)) {
+                                    opt[k][x] = val.value;
+                                    if (val.auto) { //自动变值下一个
+                                        // val.next && val.next();
+                                        val.value = !val.value;
                                     }
-                                } else if (_.isString(val)) {
-                                    opt[k][x] = val;
+                                } else {
+                                    opt[k][x] = _.isObject(val.val()) ? val.val().key : val.val();
+                                    if (val.auto) { //自动变值下一个
+                                        val.next && val.next();
+                                    }
                                 }
+                            } else if (_.isString(val)) {
+                                opt[k][x] = val;
                             }
+                            // }
                         }
                     }
                 }
@@ -5569,27 +5575,25 @@
                 var data = optCycle.data; //optCycle.init();
                 var _viewData = { tabs: [] };
                 for (var k in data) {
-                    var tab = { key: k, items: [], random: [], switch: "none", active: false };
+                    var tab = { key: k, items: [], switch: "none", active: false }; //random: [],
                     _viewData.tabs.push(tab);
                     var o = data[k];
                     if (_.isObject(o)) {
                         for (var x in o) {
                             var val = o[x];
-                            if (x == "random") {
-                                for (var y in val) {
-                                    var item = { key: y, value: val[y], text: y, method: _.camelCase("next", k, "Random", y) };
-                                    // if (optCycle.data[k][x][y].text) {
-                                    //     item.text = optCycle.data[k][x][y].text;
-                                    // }
-                                    if (optCycle.data[k][y].text) {
-                                        item.text = optCycle.data[k][y].text;
-                                    }
-                                    if (_.isBoolean(val[y])) {
-                                        item.value = optCycle.filters.toggle(val[y]);
-                                    }
-                                    tab.random.push(item);
-                                }
-                            } else if (x == "text") {
+                            // if (x == "random") {
+                            //     for (var y in val) {
+                            //         var item = { key: y, value: val[y], text: y, method: _.camelCase("next", k, "Random", y) };
+                            //         if (optCycle.data[k][y].text) {
+                            //             item.text = optCycle.data[k][y].text;
+                            //         }
+                            //         if (_.isBoolean(val[y])) {
+                            //             item.value = optCycle.filters.toggle(val[y]);
+                            //         }
+                            //         tab.random.push(item);
+                            //     }
+                            // } else 
+                            if (x == "text") {
                                 tab[x] = val;
                             } else if (x == "switch") {
                                 tab[x] = val;
@@ -5610,18 +5614,19 @@
                                         if (_.isObject(val.val())) {
                                             item.value = val.val().text ? val.val().text : val.val();
                                         } else {
-                                            if (item.key == "color") {
+                                            if (["color", "lineColor"].indexOf(item.key) >= 0) {
                                                 item.value = optCycle.filters.color(val.val());
                                             } else {
                                                 item.value = val.val();
                                             }
-
                                         }
                                     }
                                     if (val.text) {
                                         item.text = val.text;
                                     }
-
+                                    if (val.auto) {
+                                        item.auto = val.auto;
+                                    }
                                 } else {
                                     item.filter = x;
                                 }
@@ -5658,26 +5663,6 @@
                         this.context = this.canvas.getContext("2d");
                     }
                 }
-
-                // if (inBrowser) {
-                //     this.canvas = document.createElement("canvas");
-                //     this.context = this.canvas.getContext("2d");
-                // } else {
-                //     // if (wx) { //小程序
-                //     //     if (componentInstance) {
-                //     //         this.context = wx.createCanvasContext('canvas', componentInstance);
-                //     //         wx.getSystemInfo({
-                //     //             success: function(res) {
-                //     //                 self.canvas = { width: res.windowWidth, height: res.windowHeight };
-                //     //             }
-                //     //         });
-                //     //     } else {
-                //     //         return false;
-                //     //     }
-                //     // }
-                // }
-
-
 
                 if (_.isObject(options)) {
                     options.a = options.a || options.angle;
@@ -5857,7 +5842,7 @@
                         opt.color = _.rgb(); //_.hsl();小程序不支持
                     }
                     if (_.isUndefined(opt.stroke) || opt.stroke) {
-                        this.setStrokeStyle(opt.color)
+                        this.setStrokeStyle(opt.lineColor || opt.color);
                         ctx.stroke();
                     }
                 } else {
@@ -5912,18 +5897,18 @@
             default: function(opt) {
                 var canvas = this.canvas;
                 if (opt) {
-                    if (opt.randomA) {
-                        opt.a = _.random(360);
-                    }
-                    if (opt.randomShape) {
-                        opt.shape = _.random(["polygon", "circle", "start", "ray", "ring"])
-                    }
-                    if (opt.randomNum) {
-                        opt.num = _.between(3, 20);
-                    }
-                    if (opt.randomR) {
-                        opt.r = _.between(30, 80);
-                    }
+                    // if (opt.randomA) {
+                    //     opt.a = _.random(360);
+                    // }
+                    // if (opt.randomShape) {
+                    //     opt.shape = _.random(["polygon", "circle", "start", "ray", "ring"])
+                    // }
+                    // if (opt.randomNum) {
+                    //     opt.num = _.between(3, 20);
+                    // }
+                    // if (opt.randomR) {
+                    //     opt.r = _.between(30, 80);
+                    // }
                     return _.extend({}, this.default(), opt);
                 } else {
                     return {
@@ -5934,16 +5919,18 @@
                     }
                 }
             },
-             //连线
+            //连线
             link: function(vs, opt) {
                 var self = this;
                 var ctx = this.context;
                 this.beginPath(opt);
                 vs.forEach(function(t, i) {
-                    if (i == 0) {
-                        ctx.moveTo(t.x, t.y);
-                    } else {
-                        ctx.lineTo(t.x, t.y);
+                    if (t) {
+                        if (i == 0) {
+                            ctx.moveTo(t.x, t.y);
+                        } else {
+                            ctx.lineTo(t.x, t.y);
+                        }
                     }
                 })
                 self.closePath(opt);
@@ -5972,28 +5959,25 @@
                     if (opt.showVertices) {
                         var animate = opt.animate,
                             animationInterval = opt.animationInterval || 200;
-                        // if (opt.move.switch == "on") {
-                        //     animate = false
-                        // }
                         var verticesIdentifier = opt.verticesIdentifier;
+                        var _shape = self.shape();
+                        var verticesColor = _.rgb();
                         vs.forEach(function(t, i) {
                             t.fill = true;
                             if (verticesIdentifier) {
                                 t.r = 10
-                                t.text = i;
-                                // t.color = "#dedede"
+                                t.text = i + 1;
                                 t.color = "rgba(0,0,0,0.2)"
                             } else {
-                                t.r = 5
+                                t.color = verticesColor;
+                                t.r = 3;
                             }
                             if (animate) {
                                 setTimeout(function() {
-                                    self.shape().circle(t);
-                                    // _.shape(self).circle(t);
+                                    _shape.circle(t);
                                 }, animationInterval * i)
                             } else {
-                                self.shape().circle(t);
-                                // _.shape(self).circle(t);
+                                _shape.circle(t);
                             }
                         });
                     }
@@ -6021,25 +6005,22 @@
                 }
                 return self;
             },
-            // link: function(vs, opt) {
-            //     _.shape(this).link(vs, opt);
-            // },
-            // linkGroup:function(vs,opt){
-            //      _.shape(this).linkGroup(vs, opt);
-            // },
             //图形
             shape: function(opt) {
                 return _.shape(this, opt);
             },
             //图形组合
             group: function(opt) {
+                opt.group = this.default(opt.group);
                 opt.shape = this.default(opt.shape);
+                var t;
                 if (opt.group.switch == "on") {
-                    _shapeGroup(this, opt);
+                    t = _shapeGroup(this, opt);
                 } else {
-                    _shape(this, opt.shape);
+                    t = _shape(this, opt.shape);
                 }
                 this.canvas.callback && this.canvas.callback.call(this.context, this.context);
+                return t;
             },
             //运动
             motion: function(opt) {
@@ -7034,6 +7015,11 @@
             //     }
             // }
 
+            // if(_.hasAttr(el),"if"){
+            //     condition=el.attr("if");
+            //     console.log(condition)
+            // }
+
 
             if (_.hasAttr(el, SYNTAX)) {
                 syntax = el.attr(SYNTAX);
@@ -7143,6 +7129,8 @@
                 } else {
                     type = TAP;
                 }
+                var el = _.$(key.brackets(elem));
+
                 if (ON != key) {
                     var customHandler = function(item, ev) {
                         var method = self.methods["_on_" + key];
@@ -7151,15 +7139,16 @@
                         }
                     }
                     toucher({
-                        el: key.brackets(elem),
+                        el: el,
                         type: type,
                         clear: true,
                         listener: customHandler
                     });
 
                 } else {
+
                     toucher({
-                        el: key.brackets(elem),
+                        el: el,
                         type: type,
                         clear: true,
                         listener: fn

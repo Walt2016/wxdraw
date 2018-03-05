@@ -6,6 +6,21 @@ console.log(c)
 
 Page({
   data: c.viewData(),
+  checkHandler:function(e){
+    console.log(e)
+    for (var key in c.data.shape){
+      if (_.isObject(c.data.shape[key])){
+        if (e.detail.value.indexOf(key) >= 0) {
+          c.data.shape[key].auto = true;
+        } else {
+          c.data.shape[key].auto = false;
+        }
+      }
+      
+    }
+    this.setData(c.viewData());
+
+  },
   configHandler: function () {
     this.motion && this.motion.stop();
     this.setData({ showConfig: !this.data.showConfig, showCanvas: this.data.showConfig });
@@ -43,7 +58,8 @@ Page({
     var self = this;
     var context = this.context = wx.createCanvasContext('canvas', this);
     for (var key in c.methods) {
-      this[key] = (function () {
+      this[key] = (function (e) {
+        console.log(e)
         var key = this;
         c.methods[key] && c.methods[key]();
         self.setData(c.viewData())
